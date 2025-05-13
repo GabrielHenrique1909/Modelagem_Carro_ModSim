@@ -1,0 +1,80 @@
+from constantes import *
+import numpy as np
+import matplotlib.pyplot as plt 
+from math import *
+
+rpm = np.arange(1000,5001,1)
+
+def torquegeral(w):
+    if 1000<=w<=1500:
+        return 0.18*w - 60
+    elif 1500<w<=2000:
+        return 0.05*w + 135
+    elif 2000<w<=3000:
+        return -0.045*w + 325
+    elif 3000<w<=3500:
+        return -0.03*w + 280
+    elif 3500<w<=4000:
+        return -0.05*w + 350
+    elif 4000<w<=4500:
+        return -0.04*w + 310
+    elif 4500<w<=5000:
+        return -0.06*w + 400
+def torque(w,rtrans):
+    torqueg = torquegeral(w)
+    return torqueg*rtrans
+ 
+def angular(w, rtrans):
+    return w / rtrans
+
+t1 = []
+t2 = []
+t3 = []
+t4 = []
+w1 = []
+w2 = []
+w3 = []
+w4 = []
+
+for i in rpm:
+    t1.append(torque(i,n["1"]))
+    t2.append(torque(i,n["2"]))
+    t3.append(torque(i,n["3"]))
+    t4.append(torque(i,n["4"]))
+    w1.append(angular(i,n["1"]))
+    w2.append(angular(i,n["2"]))
+    w3.append(angular(i,n["3"]))
+    w4.append(angular(i,n["4"]))
+tg = []
+for j in range(len(t1)):
+    if t4[j]>t3[j]:
+        tg.append(t4[j])
+plt.plot(w1, t1, label = "1a marcha")
+plt.plot(w2, t2, label = "2a marcha")
+plt.plot(w3, t3, label = "3a marcha")
+plt.plot(w4, t4, label = "4a marcha")
+
+
+rpm_lista = np.arange(200,4400,10)
+torque_lista = [0]*len(rpm_lista)
+
+for i in range(0,len(rpm_lista)):
+    for j in range(0,len(w1)):
+        if w1[j] > rpm_lista[i]:
+            torque_lista[i] = t1[j]
+            break
+    for j in range(0,len(w2)):
+        if w2[j] > rpm_lista[i]:
+            torque_lista[i] = max(torque_lista[i],t2[j])
+            break 
+    for j in range(0,len(w3)):
+        if w3[j] > rpm_lista[i]:
+            torque_lista[i] = max(torque_lista[i],t3[j])
+            break 
+    for j in range(0,len(w4)):
+        if w4[j] > rpm_lista[i]:
+            torque_lista[i] = max(torque_lista[i],t4[j])
+            break 
+
+plt.plot(rpm_lista,torque_lista,'r--')
+plt.show()
