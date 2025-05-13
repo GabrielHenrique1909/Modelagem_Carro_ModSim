@@ -2,7 +2,7 @@ from constantes import *
 import numpy as np
 import matplotlib.pyplot as plt 
 from math import *
-
+from scipy.integrate import odeint
 rpm = np.arange(1000,5001,1)
 
 def torquegeral(w):
@@ -53,9 +53,9 @@ plt.plot(w1, t1, label = "1a marcha")
 plt.plot(w2, t2, label = "2a marcha")
 plt.plot(w3, t3, label = "3a marcha")
 plt.plot(w4, t4, label = "4a marcha")
+plt.legend()
 
-
-rpm_lista = np.arange(200,4400,10)
+rpm_lista = np.arange(200,4400,1)
 torque_lista = [0]*len(rpm_lista)
 
 for i in range(0,len(rpm_lista)):
@@ -78,3 +78,39 @@ for i in range(0,len(rpm_lista)):
 
 plt.plot(rpm_lista,torque_lista,'r--')
 plt.show()
+
+def modelo(z,t):
+    s = z[0]
+    v = z[1]
+    w = v/r 
+    for i in range(len(rpm_lista)):
+        rpm = w *30 / pi
+        rpm = int(rpm)
+        if rpm >= rpm_lista[i]:
+            tq = torque_lista[i]
+            break    
+        else:
+            tq = torque_lista[0]
+    T = tq/r
+    D = 0.5 * p*A*Cw*v**2
+    dsdt = v
+    dvdt = (T-D)/m
+    return [dsdt,dvdt]
+
+s0 = 0
+v0 = 0
+z0 = [s0,v0]
+
+dt = 1e-3
+listat = np.arange(0,20,dt)
+
+z = odeint(modelo, z0, listat)
+s = z[:,0]
+v = z[:,1]
+
+plt.plot(listat, s)
+plt.grid()
+plt.show()
+
+plt.plot(listat, v*3.6)
+plt.grid()
