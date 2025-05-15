@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from math import *
 from scipy.integrate import odeint
-rpm = np.arange(1000,5001,1)
+rpm = np.arange(1000,8001,1)
 
 def torquegeral(w):
     if 1000<=w<=1500:
@@ -18,7 +18,7 @@ def torquegeral(w):
         return -0.05*w + 350
     elif 4000<w<=4500:
         return -0.04*w + 310
-    elif 4500<w<=5000:
+    elif 4500<w<=8000:
         return -0.06*w + 400
 def torque(w,rtrans):
     torqueg = torquegeral(w)
@@ -45,17 +45,15 @@ for i in rpm:
     w2.append(angular(i,n["2"]))
     w3.append(angular(i,n["3"]))
     w4.append(angular(i,n["4"]))
-tg = []
-for j in range(len(t1)):
-    if t4[j]>t3[j]:
-        tg.append(t4[j])
+
 plt.plot(w1, t1, label = "1a marcha")
 plt.plot(w2, t2, label = "2a marcha")
 plt.plot(w3, t3, label = "3a marcha")
 plt.plot(w4, t4, label = "4a marcha")
 plt.legend()
+plt.grid()
 
-rpm_lista = np.arange(200,4400,1)
+rpm_lista = np.arange(61,4000,1)
 torque_lista = [0]*len(rpm_lista)
 
 for i in range(0,len(rpm_lista)):
@@ -75,6 +73,12 @@ for i in range(0,len(rpm_lista)):
         if w4[j] > rpm_lista[i]:
             torque_lista[i] = max(torque_lista[i],t4[j])
             break 
+valorinicial = torque_lista[0]
+lista = [valorinicial]*61
+torque_lista = lista + torque_lista
+           
+lrpm = np.arange(0,4000,1)
+rpm_lista = lrpm
 
 plt.plot(rpm_lista,torque_lista,'r--')
 plt.show()
@@ -82,15 +86,21 @@ plt.show()
 def modelo(z,t):
     s = z[0]
     v = z[1]
+    if 0<=v<6.98:
+        valor = "1"
+    elif 6.98<=v<12.6:
+        valor="2"
+    elif 12.6<=v<19:
+        valor = '3'    
+    elif 19<v:
+        valor = "4"      
     w = v/r 
+    rpm = w *30 / pi
+    rpm = int(rpm)
     for i in range(len(rpm_lista)):
-        rpm = w *30 / pi
-        rpm = int(rpm)
-        if rpm >= rpm_lista[i]:
+        if rpm == rpm_lista[i]:
             tq = torque_lista[i]
-            break    
-        else:
-            tq = torque_lista[0]
+            break        
     T = tq/r
     D = 0.5 * p*A*Cw*v**2
     dsdt = v
@@ -108,9 +118,10 @@ z = odeint(modelo, z0, listat)
 s = z[:,0]
 v = z[:,1]
 
-plt.plot(listat, s)
-plt.grid()
-plt.show()
+# plt.plot(listat, s)
+# plt.grid()
+# plt.show()
 
 plt.plot(listat, v*3.6)
 plt.grid()
+plt.show()
