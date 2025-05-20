@@ -31,29 +31,34 @@ t1 = []
 t2 = []
 t3 = []
 t4 = []
+t5 = []
 w1 = []
 w2 = []
 w3 = []
 w4 = []
+w5 = []
 
 for i in rpm:
     t1.append(torque(i,n["1"]))
     t2.append(torque(i,n["2"]))
     t3.append(torque(i,n["3"]))
     t4.append(torque(i,n["4"]))
+    t5.append(torque(i,n["5"]))
+
     w1.append(angular(i,n["1"]))
     w2.append(angular(i,n["2"]))
     w3.append(angular(i,n["3"]))
     w4.append(angular(i,n["4"]))
+    w5.append(angular(i,n["5"]))
 
 plt.plot(w1, t1, label = "1a marcha")
 plt.plot(w2, t2, label = "2a marcha")
 plt.plot(w3, t3, label = "3a marcha")
 plt.plot(w4, t4, label = "4a marcha")
-plt.legend()
+plt.plot(w5, t5, label = "5a marcha")
 plt.grid()
 
-rpm_lista = np.arange(61,4000,1)
+rpm_lista = np.arange(61,2250,1)
 torque_lista = [0]*len(rpm_lista)
 
 for i in range(0,len(rpm_lista)):
@@ -73,27 +78,29 @@ for i in range(0,len(rpm_lista)):
         if w4[j] > rpm_lista[i]:
             torque_lista[i] = max(torque_lista[i],t4[j])
             break 
+    for j in range(0,len(w5)):
+        if w5[j] > rpm_lista[i]:
+            torque_lista[i] = max(torque_lista[i],t5[j])
+            break     
 valorinicial = torque_lista[0]
 lista = [valorinicial]*61
 torque_lista = lista + torque_lista
            
-lrpm = np.arange(0,4000,1)
+lrpm = np.arange(0,2250,1)
 rpm_lista = lrpm
 
-plt.plot(rpm_lista,torque_lista,'r--')
+plt.plot(rpm_lista,torque_lista,'k--',label="Com mudança de marcha")
+plt.xlim(0)  # Limites do eixo x
+plt.ylim(0) 
+plt.xlabel("Rotação na roda [rpm]")
+plt.ylabel("Torque na roda [N.m]")
+plt.legend()
 plt.show()
 
 def modelo(z,t):
     s = z[0]
     v = z[1]
-    if 0<=v<6.98:
-        valor = "1"
-    elif 6.98<=v<12.6:
-        valor="2"
-    elif 12.6<=v<19:
-        valor = '3'    
-    elif 19<v:
-        valor = "4"      
+ 
     w = v/r 
     rpm = w *30 / pi
     rpm = int(rpm)
@@ -112,16 +119,17 @@ v0 = 0
 z0 = [s0,v0]
 
 dt = 1e-3
-listat = np.arange(0,20,dt)
+listat = np.arange(0,30,dt)
 
 z = odeint(modelo, z0, listat)
 s = z[:,0]
 v = z[:,1]
 
-# plt.plot(listat, s)
-# plt.grid()
-# plt.show()
 
 plt.plot(listat, v*3.6)
+plt.xlim(0)  # Limites do eixo x
+plt.ylim(0) 
+plt.xlabel("Tempo[s]")
+plt.ylabel("Velocidade [km/h]")
 plt.grid()
 plt.show()
